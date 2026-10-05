@@ -1,0 +1,25 @@
+{
+  "@context": "https://opentradeprotocol.com/v1/context.jsonld",
+  "@type": "ot:Escrow",
+  "ot:escrowId": "esc_9e8d7c6b-5f4a-3b2c-1d0e-9f8a7b6c5d4e",
+  "ot:listingId": "lst_8f3a2b1c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+  "ot:buyerDid": "did:pep:ru:buyer456",
+  "ot:sellerDid": "did:pep:ru:8f3a2b1c",
+  "ot:status": "inspecting",
+  "ot:amounts": {
+    "product": { "ot:amount": 28000, "ot:currency": "RUB" },
+    "shipping": { "ot:amount": 890, "ot:currency": "RUB" },
+    "insurance": { "ot:amount": 140, "ot:currency": "RUB" },
+    "platformFee": { "ot:amount": 420, "ot:currency": "RUB" },
+    "total": { "ot:amount": 29450, "ot:currency": "RUB" }
+  },
+  "ot:timeline": [
+    { "event": "created", "at": "2026-10-04T10:00:00Z" },
+    { "event": "funded", "at": "2026-10-04T10:05:00Z" },
+    { "event": "shipped", "at": "2026-10-05T14:30:00Z" },
+    { "event": "delivered", "at": "2026-10-08T11:00:00Z" }
+  ],
+  "ot:pinCode": "***42",
+  "ot:inspectionPeriodExpires": "2026-10-10T11:00:00Z",
+  "ot:disputeWindowExpires": "2026-10-11T11:00:00Z"
+}

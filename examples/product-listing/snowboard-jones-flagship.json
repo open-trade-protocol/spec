@@ -1,0 +1,163 @@
+{
+  "@context": "https://opentradeprotocol.com/v1/context.jsonld",
+  "@type": "ot:Listing",
+  "ot:version": "1.0",
+
+  "identifier": {
+    "ot:listingId": "lst_8f3a2b1c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+    "ot:nodeId": "snow.opentradeprotocol.com",
+    "ot:timestamp": "2026-10-05T12:00:00Z",
+    "ot:expiresAt": "2026-11-05T12:00:00Z"
+  },
+
+  "ot:product": {
+    "@type": "ot:Snowboard",
+    "ot:category": "winter_sports/snowboard/freeride",
+    "ot:brand": "Jones",
+    "ot:model": "Flagship",
+    "ot:modelYear": 2023,
+    "ot:specifications": {
+      "ot:lengthCm": 158,
+      "ot:waistWidthMm": 254,
+      "ot:profile": "camber_rocker",
+      "ot:flex": 8,
+      "ot:radiusM": 8.2,
+      "ot:stanceSetbackMm": 20,
+      "ot:weightRangeKg": [65, 85]
+    },
+    "ot:condition": {
+      "ot:overallGrade": "B+",
+      "ot:baseCondition": {
+        "ot:grade": "A",
+        "ot:defects": ["minor_scratch"],
+        "ot:photoRefs": ["img_base_001", "img_base_002"]
+      },
+      "ot:edgeCondition": {
+        "ot:grade": "B",
+        "ot:defects": ["edge_burr_nose"],
+        "ot:photoRefs": ["img_edge_001"]
+      },
+      "ot:topsheetCondition": {
+        "ot:grade": "A-",
+        "ot:defects": [],
+        "ot:photoRefs": ["img_top_001"]
+      },
+      "ot:usageSeasons": 2,
+      "ot:usageDaysEstimated": 35
+    },
+    "ot:serialNumber": "JNS-2023-FLG-44821",
+    "ot:serialVerified": true
+  },
+
+  "ot:pricing": {
+    "ot:askPrice": {
+      "ot:amount": 28000,
+      "ot:currency": "RUB"
+    },
+    "ot:minAcceptablePrice": {
+      "ot:amount": 25000,
+      "ot:currency": "RUB"
+    },
+    "ot:priceHistory": [
+      { "date": "2026-09-01", "price": { "ot:amount": 32000, "ot:currency": "RUB" } },
+      { "date": "2026-10-01", "price": { "ot:amount": 28000, "ot:currency": "RUB" } }
+    ],
+    "ot:marketReference": {
+      "ot:medianPrice": { "ot:amount": 27500, "ot:currency": "RUB" },
+      "ot:percentile": 55,
+      "ot:source": "opentrades_index"
+    }
+  },
+
+  "ot:logistics": {
+    "ot:sellerLocation": {
+      "ot:geohash": "uc7r1",
+      "ot:city": "Moscow",
+      "ot:country": "RU"
+    },
+    "ot:dimensions": {
+      "ot:lengthCm": 165,
+      "ot:widthCm": 32,
+      "ot:heightCm": 8,
+      "ot:weightKg": 3.2
+    },
+    "ot:shippingOptions": [
+      {
+        "ot:carrier": "cdek",
+        "ot:service": "express",
+        "ot:estimatedDays": [2, 4],
+        "ot:costFunction": "calculateShipping"
+      },
+      {
+        "ot:carrier": "russian_post",
+        "ot:service": "parcel",
+        "ot:estimatedDays": [5, 10],
+        "ot:costFunction": "calculateShipping"
+      }
+    ]
+  },
+
+  "ot:seller": {
+    "ot:did": "did:pep:ru:8f3a2b1c",
+    "ot:trustScore": {
+      "ot:overall": 0.97,
+      "ot:components": {
+        "ot:identity_verification": 1.0,
+        "ot:transaction_completion": 0.98,
+        "ot:dispute_resolution": 0.95,
+        "ot:description_accuracy": 0.96,
+        "ot:shipping_speed": 0.99
+      },
+      "ot:totalTransactions": 142,
+      "ot:disputeRate": 0.007,
+      "ot:avgResponseTimeMin": 12,
+      "ot:returnRate": 0.02,
+      "ot:verifiedIdentity": true,
+      "ot:verifiedSince": "2024-03-15",
+      "ot:decay": "exponential_180d"
+    }
+  },
+
+  "ot:media": {
+    "ot:photos": [
+      {
+        "ot:ref": "img_base_001",
+        "ot:url": "https://cdn.snow.opentradeprotocol.com/img/8f3a2b1c/base_001.avif",
+        "ot:type": "base_closeup",
+        "ot:aiVerified": true,
+        "ot:aiNotes": "Consistent with declared condition grade A"
+      },
+      {
+        "ot:ref": "img_base_002",
+        "ot:url": "https://cdn.snow.opentradeprotocol.com/img/8f3a2b1c/base_002.avif",
+        "ot:type": "base_closeup_angle2",
+        "ot:aiVerified": true,
+        "ot:aiNotes": "Consistent with declared condition grade A"
+      },
+      {
+        "ot:ref": "img_edge_001",
+        "ot:url": "https://cdn.snow.opentradeprotocol.com/img/8f3a2b1c/edge_001.avif",
+        "ot:type": "edge_detail",
+        "ot:aiVerified": true,
+        "ot:aiNotes": "Minor burr at nose - matches defect declaration"
+      },
+      {
+        "ot:ref": "img_top_001",
+        "ot:url": "https://cdn.snow.opentradeprotocol.com/img/8f3a2b1c/top_001.avif",
+        "ot:type": "topsheet_overview",
+        "ot:aiVerified": true,
+        "ot:aiNotes": "Clean topsheet - matches grade A-"
+      }
+    ],
+    "ot:video360": "https://cdn.snow.opentradeprotocol.com/vid/8f3a2b1c/360.webm",
+    "ot:aiConditionReport": "https://api.snow.opentradeprotocol.com/v1/condition/lst_8f3a2b1c"
+  },
+
+  "ot:escrow": {
+    "ot:enabled": true,
+    "ot:inspectionPeriodHours": 48,
+    "ot:disputeWindowHours": 72,
+    "ot:platformFeePercent": 1.5,
+    "ot:buyerProtectionLevel": "full"
+  }
+}

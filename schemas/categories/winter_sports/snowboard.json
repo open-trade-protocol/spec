@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opentradeprotocol.com/schemas/v1/category/winter_sports/snowboard.json",
+  "title": "Snowboard",
+  "description": "JSON Schema for snowboard product listings in the OpenTrade Protocol",
+  "type": "object",
+  "required": ["category", "brand", "model", "condition", "specifications"],
+  "properties": {
+    "category": {
+      "type": "string",
+      "const": "winter_sports/snowboard",
+      "description": "Fixed category identifier"
+    },
+    "brand": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "Snowboard brand name"
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "Snowboard model name"
+    },
+    "modelYear": {
+      "type": "integer",
+      "minimum": 2000,
+      "maximum": 2100,
+      "description": "Manufacturing year"
+    },
+    "specifications": {
+      "type": "object",
+      "required": ["lengthCm", "waistWidthMm", "profile", "flex"],
+      "properties": {
+        "lengthCm": {
+          "type": "number",
+          "minimum": 120,
+          "maximum": 200,
+          "description": "Board length in centimeters"
+        },
+        "waistWidthMm": {
+          "type": "number",
+          "minimum": 100,
+          "maximum": 400,
+          "description": "Waist width in millimeters"
+        },
+        "profile": {
+          "type": "string",
+          "enum": [
+            "camber",
+            "rocker",
+            "camber_rocker",
+            "rocker_camber",
+            "flat",
+            "hybrid"
+          ],
+          "description": "Board profile type"
+        },
+        "flex": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Flex rating (1=soft, 10=stiff)"
+        },
+        "radiusM": {
+          "type": "number",
+          "minimum": 3,
+          "maximum": 25,
+          "description": "Sidecut radius in meters"
+        },
+        "stanceSetbackMm": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Stance setback in millimeters"
+        },
+        "weightRangeKg": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "number" },
+          "description": "Recommended rider weight range [min, max] in kg"
+        },
+        "bindingMount": {
+          "type": "string",
+          "enum": ["4x2", "2x4", "3x3", "custom"],
+          "description": "Binding mounting pattern"
+        }
+      },
+      "additionalProperties": false
+    },
+    "condition": {
+      "type": "object",
+      "required": ["overallGrade", "baseCondition", "edgeCondition", "topsheetCondition"],
+      "properties": {
+        "overallGrade": {
+          "type": "string",
+          "enum": ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-"],
+          "description": "Overall condition grade"
+        },
+        "baseCondition": {
+          "type": "object",
+          "required": ["grade", "defects"],
+          "properties": {
+            "grade": {
+              "type": "string",
+              "enum": ["A", "B", "C", "D"]
+            },
+            "defects": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "minor_scratch",
+                  "moderate_scratch",
+                  "deep_scratch",
+                  "core_show",
+                  "delamination",
+                  "none"
+                ]
+              }
+            },
+            "photoRefs": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": false
+        },
+        "edgeCondition": {
+          "type": "object",
+          "required": ["grade", "defects"],
+          "properties": {
+            "grade": {
+              "type": "string",
+              "enum": ["A", "B", "C", "D"]
+            },
+            "defects": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "edge_burr_nose",
+                  "edge_burr_tail",
+                  "rust",
+                  "dull_edge",
+                  "none"
+                ]
+              }
+            },
+            "photoRefs": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": false
+        },
+        "topsheetCondition": {
+          "type": "object",
+          "required": ["grade", "defects"],
+          "properties": {
+            "grade": {
+              "type": "string",
+              "enum": ["A", "B", "C", "D"]
+            },
+            "defects": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "minor_dent",
+                  "paint_peel",
+                  "graphic_damage",
+                  "none"
+                ]
+              }
+            },
+            "photoRefs": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": false
+        },
+        "usageSeasons": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 30,
+          "description": "Estimated number of seasons used"
+        },
+        "usageDaysEstimated": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 500,
+          "description": "Estimated number of days used"
+        }
+      },
+      "additionalProperties": false
+    },
+    "serialNumber": {
+      "type": ["string", "null"],
+      "description": "Manufacturer serial number"
+    },
+    "serialVerified": {
+      "type": "boolean",
+      "description": "Whether the serial number was verified against manufacturer database"
+    }
+  },
+  "additionalProperties": false
+}

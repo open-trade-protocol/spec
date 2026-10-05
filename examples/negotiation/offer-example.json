@@ -1,0 +1,19 @@
+{
+  "@context": "https://opentradeprotocol.com/v1/context.jsonld",
+  "@type": "ot:Offer",
+  "ot:offerId": "off_3c4d5e6f-7a8b-9c0d-1e2f-3a4b5c6d7e8f",
+  "ot:listingId": "lst_8f3a2b1c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+  "ot:buyerDid": "did:pep:ru:buyer456",
+  "ot:sellerDid": "did:pep:ru:8f3a2b1c",
+  "ot:offerPrice": {
+    "ot:amount": 26000,
+    "ot:currency": "RUB"
+  },
+  "ot:message": "Based on analysis of 14 comparable listings, the median price for this condition is 26,500 RUB. We offer 26,000 RUB with immediate payment via escrow. The board matches our requirements: flex 8, length 158cm, good base condition.",
+  "ot:expiresIn": "PT2H",
+  "ot:paymentMethod": "escrow",
+  "ot:status": "pending",
+  "ot:createdAt": "2026-10-05T14:00:00Z",
+  "ot:expiresAt": "2026-10-05T16:00:00Z",
+  "ot:signature": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6cGVwOnJ1OmJ1eWVyNDU2IiwiaWF0IjoxNjk2NTAwMDAwLCJleHAiOjE2OTY1MDcyMDB9.signature_here"
+}
