@@ -1,958 +1,109 @@
 openapi: 3.1.0
 info:
-  title: OpenTrade Protocol
-  version: 1.0.0-draft
-  description: >
-    Open protocol for structured peer-to-peer commerce, optimized for AI agent consumption.
-    Any node can publish listings; AI agents discover and transact across all nodes using a single API.
+  title: OpenTrade Protocol - Listings API
+  version: 0.1.0
+  description: |
+    Спецификация API для публикации и поиска торговых предложений (листингов) в сети OpenTrade.
+    Оптимизирован для потребления AI-агентами (поддержка JSON-LD).
   contact:
     name: OpenTrade Protocol Team
     url: https://opentradeprotocol.com
   license:
-    name: Apache-2.0
-    url: https://www.apache.org/licenses/LICENSE-2.0
-  x-ai-friendly: true
-  x-rate-limit-default: "1000/minute"
-  x-auth: "Bearer API key or DID-signed JWT"
+    name: CC-BY 4.0
+    url: https://creativecommons.org/licenses/by/4.0/
 
 servers:
-  - url: https://api.opentradeprotocol.com/v1
-    description: Primary OpenTrade API (PEP Index)
-  - url: https://snow.opentradeprotocol.com/v1
-    description: Reference node - snowboard category
+  - url: http://localhost:8000
+    description: Локальная разработка (PEP Node)
 
 paths:
-  /search:
-    post:
-      operationId: searchProducts
-      summary: Structured + semantic product search
-      description: >
-        Primary endpoint for AI agents. Accepts both structured filters and natural language queries.
-        Results include total_landed_cost calculated for the buyer's location.
-      tags:
-        - Search
-      security:
-        - ApiKeyAuth: []
-        - DidAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SearchRequest'
-      responses:
-        '200':
-          description: Search results with total cost
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SearchResponse'
-        '400':
-          description: Invalid request
-        '401':
-          description: Unauthorized
-        '429':
-          description: Rate limit exceeded
-
-  /search/semantic:
-    post:
-      operationId: semanticSearch
-      summary: Vector embedding search
-      description: >
-        Accepts an embedding vector from the agent's LLM. Finds listings by semantic meaning,
-        not keywords. Useful for queries like "a board that handles deep snow well but is maneuverable in trees".
-      tags:
-        - Search
-      security:
-        - ApiKeyAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SemanticSearchRequest'
-      responses:
-        '200':
-          description: Semantic search results
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SearchResponse'
-        '400':
-          description: Invalid request
-
-  /listings/{listingId}:
+  /api/v1/listings:
     get:
-      operationId: getListing
-      summary: Get a single listing
-      description: Returns the full PEP listing object with all structured data.
-      tags:
-        - Listings
+      summary: Поиск и получение списка листингов
+      operationId: getListings
       parameters:
-        - name: listingId
-          in: path
-          required: true
-          schema: { type: string }
-        - name: buyer_lat
+        - name: category
           in: query
-          schema: { type: number }
-          description: Buyer's latitude for total cost calculation
-        - name: buyer_lon
-          in: query
-          schema: { type: number }
-          description: Buyer's longitude for total cost calculation
-      responses:
-        '200':
-          description: Listing object
-          content:
-            application/ld+json:
-              schema:
-                $ref: '#/components/schemas/Listing'
-        '404':
-          description: Listing not found
-
-  /listings/{listingId}/offers:
-    post:
-      operationId: createOffer
-      summary: Make an offer on a listing
-      description: >
-        AI agents can programmatically negotiate. The offer is signed with the buyer's DID.
-        The seller's agent can accept, reject, or counter-offer.
-      tags:
-        - Negotiation
-      security:
-        - DidAuth: []
-      parameters:
-        - name: listingId
-          in: path
-          required: true
-          schema: { type: string }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OfferRequest'
-      responses:
-        '201':
-          description: Offer created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Offer'
-        '400':
-          description: Invalid offer
-        '410':
-          description: Listing expired
-
-  /listings/{listingId}/offers/{offerId}/respond:
-    post:
-      operationId: respondToOffer
-      summary: Accept, reject, or counter an offer
-      description: >
-        The seller (or their AI agent) responds to a buyer's offer.
-        A counter-offer becomes a new offer with its own TTL.
-      tags:
-        - Negotiation
-      security:
-        - DidAuth: []
-      parameters:
-        - name: listingId
-          in: path
-          required: true
-          schema: { type: string }
-        - name: offerId
-          in: path
-          required: true
-          schema: { type: string }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OfferResponse'
-      responses:
-        '200':
-          description: Response processed
-        '404':
-          description: Offer not found or expired
-
-  /listings/{listingId}/total-cost:
-    get:
-      operationId: getTotalCost
-      summary: Calculate total landed cost
-      description: >
-        Returns the full cost breakdown for a specific listing and buyer location.
-        This is the primary metric AI agents use for comparison.
-      tags:
-        - Pricing
-      parameters:
-        - name: listingId
-          in: path
-          required: true
-          schema: { type: string }
-        - name: buyer_lat
-          in: query
-          required: true
-          schema: { type: number }
-        - name: buyer_lon
-          in: query
-          required: true
-          schema: { type: number }
-        - name: insurance
-          in: query
-          schema: { type: boolean, default: true }
-      responses:
-        '200':
-          description: Cost breakdown
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TotalCostResponse'
-        '404':
-          description: Listing not found
-
-  /categories/{categoryId}/schema:
-    get:
-      operationId: getCategorySchema
-      summary: Get JSON Schema for a product category
-      description: >
-        AI agents read this once and cache it. Defines all valid fields for specifications
-        in this category. Enables strict validation of listings.
-      tags:
-        - Categories
-      parameters:
-        - name: categoryId
-          in: path
-          required: true
-          schema: { type: string }
-      responses:
-        '200':
-          description: JSON Schema
-          content:
-            application/schema+json:
-              schema:
-                type: object
-        '404':
-          description: Category not found
-
-  /listings/bulk:
-    get:
-      operationId: bulkListings
-      summary: Bulk fetch for indexing
-      description: >
-        Efficiently sync listings with an agent's internal index.
-        Supports cursor-based pagination, If-Modified-Since, and ETag.
-      tags:
-        - Indexing
-      parameters:
-        - name: updated_since
-          in: query
-          schema: { type: string, format: date-time }
-        - name: categories
-          in: query
-          schema: { type: array, items: { type: string } }
-        - name: cursor
-          in: query
-          schema: { type: string }
+          schema:
+            type: string
+            enum: [snowboards, bindings, boots, apparel, accessories, all]
+            default: all
         - name: limit
           in: query
-          schema: { type: integer, default: 100, maximum: 1000 }
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
       responses:
         '200':
-          description: Bulk listing data
-          headers:
-            ETag:
-              schema: { type: string }
-              description: ETag for caching
+          description: Успешный ответ
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BulkResponse'
-        '304':
-          description: Not modified (ETag match)
-
-  /federation/announce:
+                type: object
+                properties:
+                  total: { type: integer }
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Listing' }
     post:
-      operationId: announceListings
-      summary: Node announces new listings to the index
-      description: >
-        PEP nodes publish their listings to the central index for discovery by AI agents.
-        Listings are signed with the node's key; the index verifies signatures.
-      tags:
-        - Federation
-      security:
-        - NodeAuth: []
+      summary: Публикация нового листинга
+      operationId: createListing
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/FederationAnnounce'
-      responses:
-        '202':
-          description: Announcements accepted
-        '401':
-          description: Invalid node credentials
-
-  /escrow/create:
-    post:
-      operationId: createEscrow
-      summary: Create an escrow contract
-      description: >
-        Initiates the escrow flow. Buyer funds the escrow, seller ships,
-        buyer confirms with PIN or AI photo verification.
-      tags:
-        - Escrow
-      security:
-        - DidAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EscrowCreateRequest'
+            schema: { $ref: '#/components/schemas/ListingCreate' }
       responses:
         '201':
-          description: Escrow created
+          description: Листинг создан
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Escrow'
-        '400':
-          description: Invalid request
-
-  /escrow/{escrowId}/confirm:
-    post:
-      operationId: confirmEscrow
-      summary: Confirm receipt (buyer)
-      description: Buyer confirms the received item matches the listing.
-      tags:
-        - Escrow
-      security:
-        - DidAuth: []
-      parameters:
-        - name: escrowId
-          in: path
-          required: true
-          schema: { type: string }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EscrowConfirm'
-      responses:
-        '200':
-          description: Funds released to seller
-        '400':
-          description: Invalid confirmation
-
-  /escrow/{escrowId}/dispute:
-    post:
-      operationId: disputeEscrow
-      summary: Dispute an escrow
-      description: Buyer disputes the transaction. Items are held during arbitration.
-      tags:
-        - Escrow
-      security:
-        - DidAuth: []
-      parameters:
-        - name: escrowId
-          in: path
-          required: true
-          schema: { type: string }
-      responses:
-        '200':
-          description: Dispute opened
-        '400':
-          description: Too late to dispute (past window)
-
-  /trust/{did}:
-    get:
-      operationId: getTrustScore
-      summary: Get trust score for a DID
-      description: Returns the computed trust score and its components for a participant.
-      tags:
-        - Trust
-      parameters:
-        - name: did
-          in: path
-          required: true
-          schema: { type: string }
-      responses:
-        '200':
-          description: Trust score
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TrustScore'
-        '404':
-          description: DID not found
-
-  /logistics/calculate:
-    post:
-      operationId: calculateLogistics
-      summary: Calculate shipping options
-      description: Returns carrier options, costs, and delivery estimates for given dimensions.
-      tags:
-        - Logistics
-      security:
-        - ApiKeyAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LogisticsRequest'
-      responses:
-        '200':
-          description: Shipping options
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LogisticsResponse'
+              schema: { $ref: '#/components/schemas/Listing' }
 
 components:
-  securitySchemes:
-    ApiKeyAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: API_KEY
-      description: API key for registered AI agents
-    DidAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: DID_JWT
-      description: DID-signed JWT for authenticated actions
-    NodeAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: NODE_KEY
-      description: Node credentials for federation
-
   schemas:
-    SearchRequest:
-      type: object
-      required: [query]
-      properties:
-        query:
-          type: string
-          description: Natural language or keyword query
-        filters:
-          $ref: '#/components/schemas/SearchFilters'
-        buyer_location:
-          $ref: '#/components/schemas/Location'
-        sort:
-          type: string
-          enum: [relevance_score, total_cost_asc, total_cost_desc, newest, seller_rating_desc]
-          default: relevance_score
-        limit:
-          type: integer
-          default: 20
-          maximum: 100
-        cursor:
-          type: string
-          description: Opaque cursor for pagination
-        include_logistics:
-          type: boolean
-          default: true
-        currency:
-          type: string
-          description: ISO 4217 currency code
-
-    SearchFilters:
-      type: object
-      properties:
-        category: { type: string }
-        brand: { type: array, items: { type: string } }
-        condition: { type: array, items: { type: string, enum: [new, like_new, good, fair, poor] } }
-        price_max: { type: number }
-        price_min: { type: number }
-        seller_min_rating: { type: number }
-        seller_max_dispute_rate: { type: number }
-        ai_confidence_min: { type: number }
-        has_serial_verification: { type: boolean }
-        year_min: { type: integer }
-        year_max: { type: integer }
-
-    SearchResponse:
-      type: object
-      properties:
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/SearchResult'
-        total_estimated:
-          type: integer
-        next_cursor:
-          type: string
-        search_metadata:
-          type: object
-          properties:
-            query_understood_as: { type: string }
-            semantic_fallback_used: { type: boolean }
-            execution_time_ms: { type: integer }
-
-    SearchResult:
-      type: object
-      properties:
-        listing_id: { type: string }
-        node_id: { type: string }
-        product:
-          type: object
-          properties:
-            category: { type: string }
-            brand: { type: string }
-            model: { type: string }
-            condition:
-              type: object
-              properties:
-                overall_grade: { type: string }
-                description_accuracy: { type: number }
-        pricing:
-          type: object
-          properties:
-            ask_price:
-              type: object
-              properties:
-                amount: { type: number }
-                currency: { type: string }
-        total_landed_cost:
-          type: object
-          properties:
-            product: { type: number }
-            shipping: { type: number }
-            insurance: { type: number }
-            platform_fee: { type: number }
-            total: { type: number }
-        seller:
-          type: object
-          properties:
-            did: { type: string }
-            trust_score: { type: number }
-        ai_confidence:
-          type: number
-          description: Confidence score of AI verification
-
     Listing:
       type: object
+      required: [id, type, title, price, currency, category, seller]
       properties:
-        '@context':
+        "@context":
           type: string
-          description: JSON-LD context URL
-        '@type':
+          default: "https://opentradeprotocol.com/contexts/listing-v1.jsonld"
+        id:
           type: string
-          enum: [ot:Listing]
-        ot:version:
+          format: uri
+          example: "urn:opentrade:listing:550e8400-e29b-41d4-a716-446655440000"
+        type:
           type: string
-        identifier:
-          type: object
-          properties:
-            ot:listingId: { type: string }
-            ot:nodeId: { type: string }
-            ot:timestamp: { type: string, format: date-time }
-            ot:expiresAt: { type: string, format: date-time }
-        product:
-          type: object
-          description: Category-specific product data (validated against category schema)
-        pricing:
-          $ref: '#/components/schemas/Pricing'
-        logistics:
-          $ref: '#/components/schemas/Logistics'
+          default: "ot:Listing"
+        title: { type: string, maxLength: 200, example: "Burton Custom X 2024" }
+        description: { type: string, maxLength: 2000 }
+        price: { type: number, format: float, minimum: 0, example: 45000.00 }
+        currency: { type: string, example: "RUB", default: "RUB" }
+        category: { type: string, example: "snowboards" }
+        condition:
+          type: string
+          enum: [new, used_like_new, used_good, used_fair, for_parts]
+          example: "used_good"
         seller:
           type: object
           properties:
-            ot:did: { type: string }
-            ot:trustScore:
-              $ref: '#/components/schemas/TrustScore'
-        media:
-          type: object
-          properties:
-            ot:photos:
-              type: array
-              items:
-                type: object
-                properties:
-                  ot:ref: { type: string }
-                  ot:url: { type: string, format: uri }
-                  ot:type: { type: string }
-                  ot:aiVerified: { type: boolean }
-                  ot:aiNotes: { type: string }
-            ot:video360: { type: string, format: uri }
-            ot:aiConditionReport: { type: string, format: uri }
-        escrow:
-          type: object
-          properties:
-            ot:enabled: { type: boolean }
-            ot:inspectionPeriodHours: { type: integer }
-            ot:disputeWindowHours: { type: integer }
-            ot:platformFeePercent: { type: number }
-            ot:buyerProtectionLevel: { type: string, enum: [full, partial, none] }
+            node_id: { type: string, example: "node-snowboard-alpine-01" }
+            reputation_score: { type: number, minimum: 0, maximum: 100, example: 98.5 }
+          required: [node_id]
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
 
-    Pricing:
+    ListingCreate:
       type: object
+      required: [title, price, currency, category, seller_node_id]
       properties:
-        ot:askPrice:
-          type: object
-          properties:
-            ot:amount: { type: number }
-            ot:currency: { type: string }
-        ot:minAcceptablePrice:
-          type: object
-          properties:
-            ot:amount: { type: number }
-            ot:currency: { type: string }
-        ot:priceHistory:
-          type: array
-          items:
-            type: object
-            properties:
-              date: { type: string, format: date }
-              price:
-                type: object
-                properties:
-                  amount: { type: number }
-                  currency: { type: string }
-        ot:marketReference:
-          type: object
-          properties:
-            ot:medianPrice:
-              type: object
-              properties:
-                amount: { type: number }
-                currency: { type: string }
-            ot:percentile: { type: integer }
-            ot:source: { type: string }
-
-    Logistics:
-      type: object
-      properties:
-        ot:sellerLocation:
-          type: object
-          properties:
-            ot:geohash: { type: string }
-            ot:city: { type: string }
-            ot:country: { type: string }
-        ot:dimensions:
-          type: object
-          properties:
-            ot:lengthCm: { type: number }
-            ot:widthCm: { type: number }
-            ot:heightCm: { type: number }
-            ot:weightKg: { type: number }
-        ot:shippingOptions:
-          type: array
-          items:
-            type: object
-            properties:
-              ot:carrier: { type: string }
-              ot:service: { type: string }
-              ot:estimatedDays:
-                type: array
-                items: { type: integer }
-              ot:costFunction: { type: string }
-
-    OfferRequest:
-      type: object
-      required: [offerPrice, currency]
-      properties:
-        ot:offerPrice:
-          type: number
-        ot:currency:
-          type: string
-        ot:message:
-          type: string
-          description: AI-generated reasoning for the offer
-        ot:expiresIn:
-          type: string
-          description: ISO 8601 duration (e.g., PT2H)
-        ot:buyerDid:
-          type: string
-        ot:paymentMethod:
-          type: string
-          enum: [escrow, direct, crypto]
-
-    Offer:
-      type: object
-      properties:
-        ot:offerId: { type: string }
-        ot:listingId: { type: string }
-        ot:buyerDid: { type: string }
-        ot:sellerDid: { type: string }
-        ot:offerPrice:
-          type: object
-          properties:
-            ot:amount: { type: number }
-            ot:currency: { type: string }
-        ot:message: { type: string }
-        ot:status:
-          type: string
-          enum: [pending, accepted, rejected, countered, expired]
-        ot:createdAt: { type: string, format: date-time }
-        ot:expiresAt: { type: string, format: date-time }
-        ot:signature:
-          type: string
-          description: DID-signed JWT
-
-    OfferResponse:
-      type: object
-      required: [action]
-      properties:
-        action:
-          type: string
-          enum: [accept, reject, counter]
-        ot:counterOfferPrice:
-          type: number
-          description: Required if action=counter
-        ot:counterCurrency:
-          type: string
-          description: Required if action=counter
-        ot:counterExpiresIn:
-          type: string
-          description: ISO 8601 duration
-        ot:counterMessage:
-          type: string
-
-    EscrowCreateRequest:
-      type: object
-      required: [listingId, buyerDid, sellerDid]
-      properties:
-        ot:listingId: { type: string }
-        ot:buyerDid: { type: string }
-        ot:sellerDid: { type: string }
-        ot:shippingMethod: { type: string }
-        ot:insurance: { type: boolean, default: true }
-        ot:paymentMethod:
-          type: string
-          enum: [bank_transfer, card, crypto]
-
-    Escrow:
-      type: object
-      properties:
-        ot:escrowId: { type: string }
-        ot:listingId: { type: string }
-        ot:buyerDid: { type: string }
-        ot:sellerDid: { type: string }
-        ot:status:
-          type: string
-          enum: [created, funded, shipped, delivered, inspecting, confirmed, disputed, arbitrating, settled, refunded]
-        ot:amounts:
-          type: object
-          properties:
-            product:
-              type: object
-              properties:
-                amount: { type: number }
-                currency: { type: string }
-            shipping:
-              type: object
-              properties:
-                amount: { type: number }
-                currency: { type: string }
-            insurance:
-              type: object
-              properties:
-                amount: { type: number }
-                currency: { type: string }
-            platformFee:
-              type: object
-              properties:
-                amount: { type: number }
-                currency: { type: string }
-            total:
-              type: object
-              properties:
-                amount: { type: number }
-                currency: { type: string }
-        ot:timeline:
-          type: array
-          items:
-            type: object
-            properties:
-              event: { type: string }
-              at: { type: string, format: date-time }
-        ot:pinCode:
-          type: string
-          description: Masked, shown to buyer only
-        ot:inspectionPeriodExpires:
-          type: string
-          format: date-time
-        ot:disputeWindowExpires:
-          type: string
-          format: date-time
-
-    EscrowConfirm:
-      type: object
-      required: [pinCode]
-      properties:
-        ot:pinCode: { type: string }
-        ot:photoEvidence:
-          type: array
-          items:
-            type: object
-            properties:
-              url: { type: string, format: uri }
-              type: { type: string }
-
-    TrustScore:
-      type: object
-      properties:
-        ot:overall: { type: number, minimum: 0, maximum: 1 }
-        ot:components:
-          type: object
-          properties:
-            identity_verification: { type: number }
-            transaction_completion: { type: number }
-            dispute_resolution: { type: number }
-            description_accuracy: { type: number }
-            shipping_speed: { type: number }
-        ot:totalTransactions: { type: integer }
-        ot:disputeRate: { type: number }
-        ot:avgResponseTimeMin: { type: integer }
-        ot:returnRate: { type: number }
-        ot:verifiedIdentity: { type: boolean }
-        ot:verifiedSince: { type: string, format: date }
-        ot:decay: { type: string }
-        ot:categoryExpertise:
-          type: object
-          additionalProperties:
-            type: object
-            properties:
-              deals: { type: integer }
-              score: { type: number }
-
-    LogisticsRequest:
-      type: object
-      required: [origin, destination, dimensions]
-      properties:
-        origin:
-          type: object
-          properties:
-            geohash: { type: string }
-            lat: { type: number }
-            lon: { type: number }
-        destination:
-          type: object
-          properties:
-            geohash: { type: string }
-            lat: { type: number }
-            lon: { type: number }
-        dimensions:
-          type: object
-          properties:
-            l: { type: number }
-            w: { type: number }
-            h: { type: number }
-            weight: { type: number }
-        declaredValue: { type: number }
-        insurance: { type: boolean, default: true }
-
-    LogisticsResponse:
-      type: object
-      properties:
-        options:
-          type: array
-          items:
-            type: object
-            properties:
-              carrier: { type: string }
-              service: { type: string }
-              cost: { type: number }
-              insuranceCost: { type: number }
-              daysMin: { type: integer }
-              daysMax: { type: integer }
-              tracking: { type: boolean }
-        totalLandedCost:
-          type: object
-          properties:
-            product: { type: number }
-            shipping: { type: number }
-            insurance: { type: number }
-            platformFee: { type: number }
-            total: { type: number }
-
-    FederationAnnounce:
-      type: object
-      required: [nodeId, listings]
-      properties:
-        nodeId: { type: string }
-        nodePublicKey: { type: string }
-        listings:
-          type: array
-          items:
-            type: object
-            properties:
-              listingId: { type: string }
-              signature: { type: string }
-              data:
-                type: object
-                description: Full PEP listing in JSON-LD format
-        capabilities:
-          type: array
-          items:
-            type: string
-            enum: [search, escrow, logistics_cdek, logistics_russian_post, negotiation]
-
-    BulkResponse:
-      type: object
-      properties:
-        listings:
-          type: array
-          items:
-            $ref: '#/components/schemas/Listing'
-        next_cursor:
-          type: string
-        total_available:
-          type: integer
-
-    TotalCostResponse:
-      type: object
-      properties:
-        product_id: { type: string }
-        breakdown:
-          type: object
-          properties:
-            product: { type: number }
-            shipping_options:
-              type: array
-              items:
-                type: object
-                properties:
-                  carrier: { type: string }
-                  service: { type: string }
-                  cost: { type: number }
-            insurance: { type: number }
-            platformFee: { type: number }
-        cheapest_total: { type: number }
-        recommended_total: { type: number }
-        recommended_option: { type: string }
-        currency: { type: string }
-
-    SemanticSearchRequest:
-      type: object
-      required: [vector]
-      properties:
-        vector:
-          type: array
-          items: { type: number }
-          description: Embedding vector from the agent's LLM
-        filters:
-          $ref: '#/components/schemas/SearchFilters'
-        buyer_location:
-          $ref: '#/components/schemas/Location'
-        limit:
-          type: integer
-          default: 20
-        include_logistics:
-          type: boolean
-          default: true
-
-    Location:
-      type: object
-      properties:
-        lat: { type: number }
-        lon: { type: number }
-        geohash: { type: string }
-        city: { type: string }
-        country: { type: string }
+        title: { type: string, maxLength: 200 }
+        description: { type: string, maxLength: 2000 }
+        price: { type: number, format: float, minimum: 0 }
+        currency: { type: string, default: "RUB" }
+        category: { type: string }
+        condition: { type: string, enum: [new, used_like_new, used_good, used_fair, for_parts] }
+        seller_node_id: { type: string }
